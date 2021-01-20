@@ -1,0 +1,1 @@
+sudo docker build --tag jinkoo/tess-node .

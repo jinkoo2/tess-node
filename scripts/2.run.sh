@@ -1,0 +1,1 @@
+sudo docker run -d --name tessnode1 -p 9999:3333 jinkoo/tess-node
