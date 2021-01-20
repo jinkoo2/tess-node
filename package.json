@@ -1,0 +1,15 @@
+{
+  "name": "tess-node",
+  "version": "1.0.0",
+  "description": "tess + node",
+  "author": "Jinkoo Kim <jinkoo@gmail.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1",
+    "node-html-parser": "^2.0.2",
+    "uuid": "^8.3.2"
+  }
+}
