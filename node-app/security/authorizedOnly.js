@@ -43,7 +43,7 @@ const authorizedOnly = function(req, res, next) {
         .then(user=>{
             if(user){
                 console.log('User found in DB')
-                console.log(user)
+                console.log(user.email)
                 
                 if(!user.active) { // user not active
                     console.log('authorizedOnly - user is not active')

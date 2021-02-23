@@ -12,8 +12,8 @@ function base64_encode(file) {
 }
 
 //register()
-//recover_token()
-run_ocr()
+recover_token()
+//run_ocr()
 //get_lang_list()
 
 /////////////////////
@@ -22,8 +22,8 @@ run_ocr()
 function register(){
 
   const user = {
-    name: 'Jinkoo Hotmail',
-    email: 'jinkoo2@hotmail.com',
+    name: 'Jinkoo Gmail',
+    email: 'jinkoo2@gmail.com',
   };
 
   console.log('Register request')

@@ -1,5 +1,5 @@
 node-app/node_modules
-data
+node-app/data
 test-app/node_modules
 test-app/out
 not-use-mongo
