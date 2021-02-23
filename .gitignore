@@ -1,4 +1,7 @@
-node_modules
+node-app/node_modules
 data
-test-app/mode_modules
+test-app/node_modules
 test-app/out
+not-use-mongo
+mongodb/db
+

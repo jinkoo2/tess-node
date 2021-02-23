@@ -1,1 +1,1 @@
-sudo docker run -d --name tessnode1 -p 9999:3333 jinkoo/tess-node
+sudo docker run -d --name tessnode1 -p 3333:3333 jinkoo/tess-node
