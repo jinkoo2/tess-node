@@ -15,6 +15,7 @@ services:
       - ./mongodb/init.js:/docker-entrypoint-initdb.d/init.js:ro
       - ./mongodb/db:/data/db
   mongo-express:
+    container_name: mongo-express
     image: mongo-express:0.54
     restart: always
     ports:
