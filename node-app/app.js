@@ -30,7 +30,7 @@ logger.info('MONGODB_USERS_URL='+MONGODB_USERS_URL.replace(DB_USER_PW, 'xxx'))
 // App
 const app = express();
 
-app.use(assignId) // assign session uuid
+app.use(preProcessReq) 
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 //app.use(cookieParser())
@@ -57,8 +57,27 @@ app.get('/', (req, res) => {
 app.listen(PORT, HOST);
 logger.info(`Running on http://${HOST}:${PORT}`);
 
-// assign uuid for all requests
-function assignId (req, res, next) {
+
+function getReqIp(req){
+  // get the requester ip address
+  var ip;
+  if (req.headers['x-forwarded-for']) {
+      ip = req.headers['x-forwarded-for'].split(",")[0];
+  } else if (req.connection && req.connection.remoteAddress) {
+      ip = req.connection.remoteAddress;
+  } else {
+      ip = req.ip;
+  }console.log("client IP is *********************" + ip);
+  return ip;
+}
+
+function preProcessReq (req, res, next) {
+
+  // assign uuid for all requests
   req.uuid = uuidv4();
+
+  // get req ip
+  req.userIp = getReqIp(req);
+
   next()
 }

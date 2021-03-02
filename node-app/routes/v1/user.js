@@ -19,22 +19,23 @@ router.post("/register", (req, res, next)=>{
     
   const {name, email } = req.body;
   const session_id = req.uuid;
+  const session = {session_id, user_ip: req.userIp, email}
 
-  logger.info('/register', {metadata:{name, email, session_id}})
+  logger.info('/register', {metadata:{name, email, session}})
 
   //////////////////////
   // validate inputs
   
   // name
   if(!name || name.length <2 || name.length> 100){
-    logger.error("Invalid name", {metadata:{name, email, session_id}})
+    logger.error("Invalid name", {metadata:{name, session}})
     res.send("Invalid name (Name must have 2-100 characters!");
     return;    
   }
 
   // email
   if(!is_validate_email(email)) {
-    logger.error("Invalid email", {metadata:{name, email, session_id}})
+    logger.error("Invalid email", {metadata:{email, session}})
     res.send("Invalid email!")
     return;
   }  
@@ -44,7 +45,7 @@ router.post("/register", (req, res, next)=>{
   .then(data=>{
       if(data){
         res.send('the given email has been registered already')
-        logger.error("Email already registered", {metadata:{name, email, session_id}})
+        logger.error("Email already registered", {metadata:{email, session}})
         emailer.notifyAdmins('an existing user attempted to register again', email)
         return;
       }
@@ -60,7 +61,7 @@ router.post("/register", (req, res, next)=>{
           token: token,
         })
 
-        logger.info("Saving a new user", {metadata:{user, session_id}})
+        logger.info("Saving a new user", {metadata:{user, session}})
 
         user.save()
         .then(user =>{
@@ -74,20 +75,20 @@ router.post("/register", (req, res, next)=>{
           })
 
           // log & notify
-          logger.info("A new user registered", {metadata:{ email, session_id, token}})
+          logger.info("A new user registered", {metadata:{ session, token}})
 
           // notify admin
           emailer.notifyAdmins("myocr - new user registered and a email sent to the user!", JSON.stringify({email, token}))
         })
-        .catch(err => {
+        .catch(error => {
           res.status(500)
           res.send('Could not create a user in DB')
-          logger.error('error adding a user in DB...', {metadata:err});
+              logger.error('error adding a user in DB...', {metadata:{error, session}});
         });
       }
   })
-  .catch(err => {
-      logger.error('User.findOne failed', {metadata: err})
+  .catch(error => {
+      logger.error('User.findOne failed', {metadata: {error, session}})
       emailer.notifyAdmins('User.findOne() failed', JSON.stringify({email, err}))
   });
 
@@ -97,6 +98,7 @@ router.post("/send_me_my_token", (req, res, next)=>{
   
   const {email } = req.body;
   const session_id = req.uuid;
+  const session = {session_id, user_ip: req.userIp, email}
 
   logger.info('/send_me_my_token', {metadata:{ email, session_id }})
 
@@ -104,7 +106,7 @@ router.post("/send_me_my_token", (req, res, next)=>{
   // validate inputs
   // email
   if(!is_validate_email(email)) {
-    logger.info("Invalid email", {metadata:{email, session_id}})
+    logger.info("Invalid email", {metadata:{email, session}})
     res.status(500)
     res.send(`Invalid email! email=${email}, session_id=${session_id}`)
     return;
@@ -114,42 +116,42 @@ router.post("/send_me_my_token", (req, res, next)=>{
   User.findOne({email})
   .then(user=>{
       if(user){ // a registered user found
-        logger.info('A registered user found in DB', {metadata:{email}})
+        logger.info('A registered user found in DB', {metadata:{email, session}})
         
         // generate a token - this token should be the same as the one in DB
         const token = jwt.sign(email, secret);
 
         if(token !== user.token){
           // this should not happen. this differemt, log and notify the admin via email
-          logger.warn('User requested a token discovery, but the newly generate token is different from the one in DB. So, updating the DB with the new token');
+          logger.warn('User requested a token discovery, but the newly generate token is different from the one in DB. So, updating the DB with the new token', {metadata:{session}});
           // update the token to DB
           user.token = token;
           user.save()
           .then(data =>{
-            logger.info('Success - updated the token in DB', {metadata:{email, token, data}});
+            logger.info('Success - updated the token in DB', {metadata:{email, token, data, session}});
           })
-          .catch(err => {
+          .catch(error => {
             res.status(500)
             res.send('Failed trieving the token (db save failed). The issue has been reported to the dev team. Please try again later.')
-            logger.error('error - the generated token is different from the one in DB and failed saving the token back to DB.', {metadata: {error:err}});
+            logger.error('error - the generated token is different from the one in DB and failed saving the token back to DB.', {metadata: {error, session}});
           });
         }
 
         // send the token via email
-        logger.info('sending a recovered token', {metadata:{email, session_id}});
+        logger.info('sending a recovered token', {metadata:{session}});
         emailer.send(email, "Your recovered access token included", token)
         res.send('Your token has been sent to to your email')
-        emailer.notifyAdmins("A token recovery was successful", JSON.stringify({email, session_id}))
+        emailer.notifyAdmins("A token recovery was successful", JSON.stringify({email, session}))
       }
       else{ // no user found of the email address
         res.send({msg: 'Your account not found. Please register first.'})
       }
   })
-  .catch(err => {
+  .catch(error => {
     res.status(500) 
     res.send(`Server error - DB query failed. email=${email}, session_id=${session_id}`)
-    logger.error("DB query failed",{metadata: {err, session_id, email}})
-    emailer.notifyAdmins("DB query failed", JSON.stringify({email, session_id, error:err}))
+    logger.error("DB query failed",{metadata: {error, session}})
+    emailer.notifyAdmins("DB query failed", JSON.stringify({email, session, error}))
   });
   
 })
