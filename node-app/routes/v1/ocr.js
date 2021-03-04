@@ -78,7 +78,7 @@ function save_to_file({ img_url, img_base64, img_form_data_path, img_file_path }
     return fs_rename(img_form_data_path, img_file_path)
 }
 
-var multer  = require('multer')
+var multer = require('multer')
 var upload = multer({ dest: 'data/' })
 
 // run ocr
@@ -91,21 +91,22 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
   const inputs = req.body;
   const { img_base64, img_url, img_ext, lang } = inputs
 
-  logger.info("/ocr", { metadata: { session, img_ext, lang } })
+  // default oem & psm values
+  const oem = inputs.oem || 3;
+  const psm = inputs.psm || 1;
 
-  //console.log('inputs', inputs)
-  //console.log('file', req.file)
+  logger.info("/ocr", { metadata: { session, img_ext, lang, oem, psm } })
 
   // check if the lang is supported
   if (!lang || lang.length != 3) {
     logger.error("Parameter 'lang' is not valid. The langth should be 3.", { metadata: { session } })
     const error_code = 5;
-          res.send({
-            session_id: session_id,
-            success: false,
-            error_code,
-            message: "OCR failed - lang parameter not provided or the length is not 3",
-          });
+    res.send({
+      session_id: session_id,
+      success: false,
+      error_code,
+      message: "OCR failed - lang parameter not provided or the length is not 3",
+    });
     return;
   }
 
@@ -119,29 +120,28 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
   );
 
   // if form-data, multer saves the file data to /data & req.file.path is pointing to the file
-  if(!img_url && !img_base64)
-  {
-    if(!req.file){
+  if (!img_url && !img_base64) {
+    if (!req.file) {
       logger.error("Invalid input. Image not provided", { metadata: { session } })
       const error_code = 6;
-            res.send({
-              session_id: session_id,
-              success: false,
-              error_code,
-              message: "OCR failed - Invalid input - Image not provided",
-            });
+      res.send({
+        session_id: session_id,
+        success: false,
+        error_code,
+        message: "OCR failed - Invalid input - Image not provided",
+      });
       return;
     }
 
     inputs.img_form_data_path = req.file.path;
   }
-    
+
   save_to_file({ ...inputs, img_file_path })
     .then(() => {
 
       /////////////
       // run ocr
-      tess.run_ocr({ img_file_path, lang })
+      tess.run_ocr({ img_file_path, lang, oem, psm })
         .then(ocr => {
 
           // add session info
@@ -174,12 +174,12 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
 
     }).
     catch(error => {
-      
+
       // console.log('==============')
       // console.log(error.message)
       // console.log('==============')
 
-      if(error && error.response && error.response.status == 404){
+      if (error && error.response && error.response.status == 404) {
         const error_code = 1;
 
         //res.status(500);
@@ -190,25 +190,25 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
           session_id
         })
 
-        logger.error("ocr error", { metadata: { session, error, error_code} })
+        logger.error("ocr error", { metadata: { session, error, error_code } })
 
       }
-      else{
+      else {
         const error_code = -1;
         //res.status(500);
         res.send({
-        session_id: session_id,
-        success: false,
-        error_code,
-        message: "OCR command failed",
-      });
-      
-      logger.error("ocr error", { metadata: { session, error, error_code} })
+          session_id: session_id,
+          success: false,
+          error_code,
+          message: "OCR command failed",
+        });
+
+        logger.error("ocr error", { metadata: { session, error, error_code } })
 
 
       }
 
-      
+
     })
 
 
