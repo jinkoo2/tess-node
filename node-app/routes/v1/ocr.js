@@ -9,7 +9,12 @@ const logger = require('../../providers/logger')
 const tess = require('../../providers/tess')
 const image_downloader = require('../../providers/image_downloader')
 
+
+const util = require('util')
+const fs_rename = util.promisify(fs.rename)
+
 const version = process.env.VERSION || 'v1'
+
 
 /////////////////////////////
 // make temporary data dir
@@ -64,39 +69,43 @@ router.get("/lang_list", authorizedOnly, (req, res, next) => {
 
 }); // get()
 
-function save_to_file({ img_url, img_base64, img_data, img_file_path }) {
+function save_to_file({ img_url, img_base64, img_form_data_path, img_file_path }) {
   if (img_url)
     return image_downloader.download(img_url, img_file_path)
   else if (img_base64)
     return base64_decode(img_base64, img_file_path)
-  else {
-    fs.writeFile(img_file_path, img_data, (error) => {
-      return Promise((resolve, reject) => {
-        if (error)
-          reject(error)
-        else
-          resolve()
-      })
-    })
-  }
+  else // img_data
+    return fs_rename(img_form_data_path, img_file_path)
 }
 
+var multer  = require('multer')
+var upload = multer({ dest: 'data/' })
+
 // run ocr
-router.post("/", authorizedOnly, (req, res, next) => {
+router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => {
 
   // inputs
   const user = req.user;
   const session_id = req.uuid;
   const session = { session_id, user_ip: req.userIp, email: user.email }
   const inputs = req.body;
-  const { img_base64, img_url, img_data, img_ext, lang } = inputs
+  const { img_base64, img_url, img_ext, lang } = inputs
 
   logger.info("/ocr", { metadata: { session, img_ext, lang } })
+
+  //console.log('inputs', inputs)
+  //console.log('file', req.file)
 
   // check if the lang is supported
   if (!lang || lang.length != 3) {
     logger.error("Parameter 'lang' is not valid. The langth should be 3.", { metadata: { session } })
-
+    const error_code = 5;
+          res.send({
+            session_id: session_id,
+            success: false,
+            error_code,
+            message: "OCR failed - lang parameter not provided or the length is not 3",
+          });
     return;
   }
 
@@ -109,6 +118,24 @@ router.post("/", authorizedOnly, (req, res, next) => {
     `img-${session_id}.${img_ext}`
   );
 
+  // if form-data, multer saves the file data to /data & req.file.path is pointing to the file
+  if(!img_url && !img_base64)
+  {
+    if(!req.file){
+      logger.error("Invalid input. Image not provided", { metadata: { session } })
+      const error_code = 6;
+            res.send({
+              session_id: session_id,
+              success: false,
+              error_code,
+              message: "OCR failed - Invalid input - Image not provided",
+            });
+      return;
+    }
+
+    inputs.img_form_data_path = req.file.path;
+  }
+    
   save_to_file({ ...inputs, img_file_path })
     .then(() => {
 

@@ -21,7 +21,7 @@ if (!args || args.length == 0) {
 
 console.log('args: ', args);
 
-const api_url = "http://localhost:3334/api/v1";
+const api_url = "http://localhost:3333/api/v1";
 
 function base64_encode(file) {
   // read binary data

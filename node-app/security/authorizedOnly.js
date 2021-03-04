@@ -16,6 +16,13 @@ const authorizedOnly = function(req, res, next) {
 //   console.log('req.query=>', req.query)
 
   // if service user type='service'
+
+  console.log('=======req.body======')
+  console.log(req.body)
+
+  console.log('=======req.query======')
+  console.log(req.query)
+
   const type = req.body.type || req.query.token;
   
   const token = 
