@@ -9,12 +9,13 @@ const logger = require('../../providers/logger')
 const tess = require('../../providers/tess')
 const image_downloader = require('../../providers/image_downloader')
 
+const ERROR_CODE = require('../../error_code')
+const { err, scc } = require('../../utils/helper')
 
 const util = require('util')
 const fs_rename = util.promisify(fs.rename)
 
 const version = process.env.VERSION || 'v1'
-
 
 /////////////////////////////
 // make temporary data dir
@@ -87,26 +88,41 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
   // inputs
   const user = req.user;
   const session_id = req.uuid;
-  const session = { session_id, user_ip: req.userIp, email: user.email }
+
   const inputs = req.body;
-  const { img_base64, img_url, img_ext, lang } = inputs
+  const { img_base64, img_url, img_ext, lang, output_json, output_pdf } = inputs
 
   // default oem & psm values
   const oem = inputs.oem || 3;
   const psm = inputs.psm || 1;
 
-  logger.info("/ocr", { metadata: { session, img_ext, lang, oem, psm } })
+  // this will be recorded on most logging.
+  const req_method = (img_base64) ? "img_base64" : (img_url) ? "img_url" : "img_data";
+  const session = { session_id, user_ip: req.userIp, email: user.email, oem, psm, lang, img_ext, req_method, date: new Date() }
 
-  // check if the lang is supported
+  logger.info("/ocr", { metadata: { session } })
+
+  ////////////////
+  // check inptus
+  if (!img_ext) {
+    err(ERROR_CODE.OCR.IMG_EXT_IS_NULL, "OCR failed - Parameter 'img_ext' cannot be null.", session, res, req)
+    return;
+  }
+
+  ////////////////////
+  // img_ext supported?
+  const supported_img_ext_list = ["jpg", "jpeg", "png", "bmp", "tif", "tiff", "pdf"]
+  const ext = img_ext.toLowerCase().trim();
+  const matchlist = supported_img_ext_list.filter(item => item === ext);
+  if (!matchlist || matchlist.length === 0) {
+    err(ERROR_CODE.OCR.IMG_EXT_NOT_SUPPORTED, `OCR failed - the given img_ext(${img_ext}) is not supported`, session, res, req)
+    return
+  }
+
+  /////////////////////
+  // lang supported?
   if (!lang || lang.length != 3) {
-    logger.error("Parameter 'lang' is not valid. The langth should be 3.", { metadata: { session } })
-    const error_code = 5;
-    res.send({
-      session_id: session_id,
-      success: false,
-      error_code,
-      message: "OCR failed - lang parameter not provided or the length is not 3",
-    });
+    err(ERROR_CODE.OCR.LANG_MUST_BE_3, "OCR failed - lang parameter not provided or the length is not 3", session, res, req)
     return;
   }
 
@@ -122,14 +138,7 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
   // if form-data, multer saves the file data to /data & req.file.path is pointing to the file
   if (!img_url && !img_base64) {
     if (!req.file) {
-      logger.error("Invalid input. Image not provided", { metadata: { session } })
-      const error_code = 6;
-      res.send({
-        session_id: session_id,
-        success: false,
-        error_code,
-        message: "OCR failed - Invalid input - Image not provided",
-      });
+      err(ERROR_CODE.OCR.IMAGE_NOT_PROVIDED, "OCR failed - Invalid input - Image not provided or incorrect", session, res, req)
       return;
     }
 
@@ -139,79 +148,62 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
   save_to_file({ ...inputs, img_file_path })
     .then(() => {
 
+      ///////////////
+      // file saved?
+      if (!fs.existsSync(img_file_path)) {
+        err(ERROR_CODE.OCR.FAILED_SAVING_IMAGE_DATA, "OCR failed - image save failed on the server", session, res, req, true)
+        return;
+      }
+
+      ////////////
+      // file size (byte)
+      try {
+        var stats = fs.statSync(img_file_path)
+        session.file_size_mbyte = stats.size / (1024 * 1024);
+      }
+      catch (error) {
+        err(ERROR_CODE.OCR.FAILED_GETTING_FILE_SIZE, "OCR failed - failed getting the image size", session, res, req)
+        return;
+      }
+
       /////////////
       // run ocr
-      tess.run_ocr({ img_file_path, lang, oem, psm })
+      tess.run_ocr({ img_file_path, lang, oem, psm, output_json, output_pdf })
         .then(ocr => {
 
           // add session info
           ocr.session_id = session_id;
           ocr.success = true;
+          ocr.file_size_mbyte = session.file_size_mbyte;
 
-          res.send(ocr)
+          // success
+          scc("OCR finished", session, res, req, ocr, {exec_ms: ocr.exec_ms})
 
           // update user stats
           user.num_reqs += 1;
-          user.num_pages += ocr.json.pages.length;
+
+          if (output_json) user.num_pages += ocr.json.pages.length;
           user.num_words += ocr.text.split(' ').length;
           user.total_sec += ocr.exec_ms / 1000;
+          user.total_mbyte += ocr.file_size_mbyte;
           user.save();
-
-          logger.info("ocr finished", { metadata: { session, exec_ms: ocr.exec_ms } })
         })
         .catch(error => {
-          logger.error("ocr error", { metadata: { session, error } })
-
-          //res.status(500);
-          const error_code = 2;
-          res.send({
-            session_id: session_id,
-            success: false,
-            error_code,
-            message: "OCR failed",
-          });
+          err(ERROR_CODE.OCR.FAILED, "OCR failed", session, res, req, true, error)
+          return;
         })
-
     }).
     catch(error => {
-
-      // console.log('==============')
-      // console.log(error.message)
-      // console.log('==============')
-
       if (error && error.response && error.response.status == 404) {
-        const error_code = 1;
-
-        //res.status(500);
-        res.send({
-          mesage: `OCR failed - The resource not found. If img_url was provided, make sure the resource exists.`,
-          success: false,
-          error_code,
-          session_id
-        })
-
-        logger.error("ocr error", { metadata: { session, error, error_code } })
-
+        err(ERROR_CODE.OCR.RESOURCE_NOT_FOUND, `OCR failed - The resource not found (404). If img_url was provided, make sure the resource exists.`,
+          session, res, req, true, error)
+        return;
       }
       else {
-        const error_code = -1;
-        //res.status(500);
-        res.send({
-          session_id: session_id,
-          success: false,
-          error_code,
-          message: "OCR command failed",
-        });
-
-        logger.error("ocr error", { metadata: { session, error, error_code } })
-
-
+        err(ERROR_CODE.GENERAL, "OCR failed", session, res, req, true, error)
+        return;
       }
-
-
     })
-
-
 });
 
 module.exports = router;

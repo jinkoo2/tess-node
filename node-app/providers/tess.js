@@ -114,7 +114,7 @@ function get_lang_list_tess() {
 
 
 
-function run_ocr({ img_file_path, lang, oem, psm }) {
+function run_ocr({ img_file_path, lang, oem, psm, output_json, output_pdf }) {
     return new Promise((resolve, reject) => {
 
         const start = new Date();
@@ -122,9 +122,16 @@ function run_ocr({ img_file_path, lang, oem, psm }) {
 
 
         // cmd
-        const cmd = `tesseract ${img_file_path} ${out_str} -l ${lang} --oem ${oem} --psm ${psm} hocr txt pdf`;
+        let cmd = `tesseract ${img_file_path} ${out_str} -l ${lang} --oem ${oem} --psm ${psm} txt `;
+
+        // output json
+        if (output_json) cmd += ' hocr';
+
+        // output pdf
+        if (output_pdf) cmd += ' pdf'
 
         exec(cmd, (error, stdout, stderr) => {
+
             if (error) {
                 reject({ msg: "tesseract command failed", cmd, error })
                 return;
@@ -140,29 +147,49 @@ function run_ocr({ img_file_path, lang, oem, psm }) {
                 lang: lang
             };
 
-            // parse the output and send the data back
             const hocr_file = img_file_path + ".hocr";
-            if (fs.existsSync(hocr_file)) {
+            const txt_file = img_file_path + ".txt";
+            const pdf_file = img_file_path + ".pdf";
+
+            // check output files
+            if (!fs.existsSync(txt_file)) {
+                reject({ msg: 'output txt file not found', cmd })
+                return;
+            }
+
+            if (output_json && !fs.existsSync(hocr_file)) {
+                reject({ msg: 'output hocr file not found', cmd })
+                return;
+            }
+
+            if (output_pdf && !fs.existsSync(pdf_file)) {
+                reject({ msg: 'output pdf file not found', cmd })
+                return;
+            }
+
+            // attach text file
+            {
+                const txt = fs.readFileSync(txt_file).toString();
+                ocr.text = txt;
+            }
+
+            // parse hocr to json and attach
+            if (output_json) {
                 const json = hocr2json(hocr_file);
                 ocr.json = json;
-
-                const txt_file = img_file_path + ".txt";
-                if (fs.existsSync(txt_file)) {
-                    const txt = fs.readFileSync(txt_file).toString();
-                    ocr.text = txt;
-
-                    // exec_ms
-                    const end = new Date();
-                    ocr.exec_ms = (end.getTime() - start.getTime());
-
-                    // return
-                    resolve(ocr);
-                } else {
-                    reject({ msg: 'result hocr file not found', cmd })
-                }
-            } else {
-                reject({ msg: 'result txt file not found', cmd })
             }
+
+            // attach pdf file
+            if (output_pdf) {
+                var bitmap = fs.readFileSync(pdf_file);
+                ocr.pdf_base64 = new Buffer(bitmap).toString('base64');
+            }
+
+            // exec_ms
+            const end = new Date();
+            ocr.exec_ms = (end.getTime() - start.getTime());
+
+            resolve(ocr)
         });
     })
 }

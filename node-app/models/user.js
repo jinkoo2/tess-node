@@ -4,74 +4,111 @@ const mongoose = require('mongoose');
 //const saltRounds = 10;
 
 const UserSchema = mongoose.Schema(
-    {
-      name: { 
-        type: String, 
-        required:true, 
-        minlength:2,
-        maxlength:100
-      },
-
-      email: { 
-            type: String, 
-            required:true, 
-            unique: true, 
-            minlength:10,
-            maxlength:500
-      },
-      
-      // userid: { 
-      //   type: String, 
-      //   unique: true, 
-      //   required: true,
-      //   minlength:3,
-      //   maxlength:100
-      // },
-
-      password: { 
-            type: String, 
-            // required: true,
-            minlength:8,
-            maxlength:500
-        },
-
-      type: {
-        type: String,
-        default: 'user' // user or admin
-      },
-
-      settings: {
-        type: Object
-      },
-
-      active: {
-        type: Boolean,
-        default: true
-      },
-      num_reqs: { 
-        type: Number, 
-        default: 0
-      },
-      num_pages: { 
-        type: Number, 
-        default: 0
-      },
-      num_words: { 
-        type: Number, 
-        default: 0
-      },
-      total_sec: { 
-        type: Number, 
-        default: 0
-      },
-      token:{
-        type:String,
-        default: ""
-      }
+  {
+    name: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 100
     },
-    {
-        timestamps:true
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      minlength: 10,
+      maxlength: 500
+    },
+
+    // userid: { 
+    //   type: String, 
+    //   unique: true, 
+    //   required: true,
+    //   minlength:3,
+    //   maxlength:100
+    // },
+
+    // not used for now
+    password: {
+      type: String,
+      // required: true,
+      minlength: 8,
+      maxlength: 500
+    },
+
+    type: {
+      type: String,
+      default: 'user' // user or admin
+    },
+
+    // user applications
+    apps: [],
+
+    settings: {
+      type: Object
+    },
+
+    active: {
+      type: Boolean,
+      default: true
+    },
+
+    num_reqs: {
+      type: Number,
+      default: 0
+    },
+
+    num_reqs_of_today: {
+      type: Number,
+      default: 0
+    },
+    num_reqs_of_this_month: {
+      type: Number,
+      default: 0
+    },
+    num_reqs_of_this_year: {
+      type: Number,
+      default: 0
+    },
+
+    num_of_allowed_reqs_per_day: {
+      type: Number,
+      default: 1000000000000000000
+    },
+
+    num_of_allowed_reqs_per_month: {
+      type: Number,
+      default: 1000000000000000000
+    },
+    num_of_allowed_reqs_per_year: {
+      type: Number,
+      default: 1000000000000000000
+    },
+
+    num_pages: {
+      type: Number,
+      default: 0
+    },
+    num_words: {
+      type: Number,
+      default: 0
+    },
+    total_sec: {
+      type: Number,
+      default: 0
+    },
+    total_mbyte: {
+      type: Number,
+      default: 0
+    },
+    token: {
+      type: String,
+      default: ""
     }
+  },
+  {
+    timestamps: true
+  }
 );
 
 // UserSchema.pre('save', function(next) {

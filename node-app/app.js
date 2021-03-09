@@ -25,7 +25,7 @@ const DB_NAME = process.env.DB_NAME || "mydb";
 const DB_PORT = process.env.DB_PORT || 27017;
 
 const MONGODB_USERS_URL = `mongodb://${DB_USER_ID}:${DB_USER_PW}@${DB_SERVER}:${DB_PORT}/${DB_NAME}`
-logger.info('MONGODB_USERS_URL='+MONGODB_USERS_URL.replace(DB_USER_PW, 'xxx'))
+logger.info('MONGODB_USERS_URL=' + MONGODB_USERS_URL.replace(DB_USER_PW, 'xxx'))
 
 // App
 const app = express();
@@ -46,9 +46,14 @@ app.use((req, res, next) => {
   res.append("Access-Control-Allow-Headers", "Content-Type,*");
   next();
 });
-app.use(preProcessReq) 
+app.use(preProcessReq)
+
+// for parsing application/json
 app.use(express.json())
-app.use(express.urlencoded({extended:false}))
+
+// for parsing application/xwww-form-urlencoded
+app.use(express.urlencoded({ extended: true }))
+
 //app.use(cookieParser())
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -56,7 +61,7 @@ app.use(express.static(path.join(__dirname, "public")));
 mongoose
   .connect(
     MONGODB_USERS_URL,
-    { useNewUrlParser: true,  useUnifiedTopology: true }
+    { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => logger.info('MongoDB Connected'))
   .catch(err => logger.error(err));
@@ -70,21 +75,20 @@ app.use('/api/v1/users', require('./routes/v1/user'))
 app.listen(PORT, HOST);
 logger.info(`Running on http://${HOST}:${PORT}`);
 
-
-function getReqIp(req){
+function getReqIp(req) {
   // get the requester ip address
   var ip;
   if (req.headers['x-forwarded-for']) {
-      ip = req.headers['x-forwarded-for'].split(",")[0];
+    ip = req.headers['x-forwarded-for'].split(",")[0];
   } else if (req.connection && req.connection.remoteAddress) {
-      ip = req.connection.remoteAddress;
+    ip = req.connection.remoteAddress;
   } else {
-      ip = req.ip;
-  }console.log("client IP is *********************" + ip);
+    ip = req.ip;
+  } console.log("client IP is *********************" + ip);
   return ip;
 }
 
-function preProcessReq (req, res, next) {
+function preProcessReq(req, res, next) {
 
   // assign uuid for all requests
   req.uuid = uuidv4();
@@ -94,3 +98,8 @@ function preProcessReq (req, res, next) {
 
   next()
 }
+
+////////////////////
+// start scheduler
+var scheduler = require('./scheduler/scheduler');
+scheduler.scheduleJobs()

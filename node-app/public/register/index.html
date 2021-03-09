@@ -1,0 +1,36 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src='./index.js'></script>
+</head>
+
+<body>
+    <form method="post" name="myform" id="myform" action="/v1/users/register">
+        <!-- Name -->
+        <div>
+            <label>Name:</label>
+            <input type="text" name="name" id="name" required value="Jinkoo Kim" />
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" id="email" required value="jinkoo2@gmail.com" />
+        </div>
+
+        <!-- SUBMIT -->
+        <div>
+            <input type="submit" value="Register" />
+        </div>
+
+    </form>
+    <div>TEXT</div>
+    <div id="output_text"></div>
+    <div>JSON</div>
+    <div id="output_json"></div>
+
+</body>
+
+</html>

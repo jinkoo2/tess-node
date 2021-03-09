@@ -1,0 +1,8 @@
+Welcome {{name}}!
+
+Please visit the following web page to get the access code for your application.
+
+http://localhost:3333/api/v1/app/register?token={{user_token}}
+
+Best regards,
+MyOCR Team

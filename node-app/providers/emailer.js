@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
 
+
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -8,15 +9,16 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-function send(to, subject, body){
+function send(to, subject, text, html = null) {
   var mailOptions = {
-    from:'myocr.net@gmail.com',
+    from: 'myocr.net@gmail.com',
     to: to,
     subject: subject,
-    text: body
+    text,
+    html
   };
-  
-  transporter.sendMail(mailOptions, function(error, info){
+
+  transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
     } else {
@@ -25,18 +27,22 @@ function send(to, subject, body){
   });
 }
 
-function notifyAdmins(subject, body){
-  
+function send_template(to, tmpl_loader, data) {
+  send(to, tmpl_loader.toSubject(data), tmpl_loader.toText(data), tmpl_loader.toHtml(data))
+}
+
+function notifyAdmins(subject, body) {
+
   const to = 'admin@myocr.net'
-  
+
   var mailOptions = {
-    from:'myocr.net@gmail.com',
+    from: 'myocr.net@gmail.com',
     to: to,
     subject: subject,
     text: '[myocr] - ' + body
   };
-  
-  transporter.sendMail(mailOptions, function(error, info){
+
+  transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
     } else {
@@ -46,5 +52,5 @@ function notifyAdmins(subject, body){
 }
 
 
-module.exports = {send, notifyAdmins};
+module.exports = { send, send_template, notifyAdmins };
 

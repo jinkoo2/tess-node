@@ -1,7 +1,6 @@
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
-const { REPL_MODE_STRICT } = require("repl");
 
 function print_usage() {
   console.log('usage:')
@@ -149,8 +148,10 @@ function run_ocr_base64() {
 
   const obj = {
     img_base64: base64_encode(img_file),
-    img_ext: 'tif',
+    img_ext: img_file.split('.').pop().toLocaleLowerCase().trim(),
     lang: "eng",
+    output_json: true,
+    output_pdf: true,
     token: token_obj.token
   };
 
@@ -165,7 +166,7 @@ function run_ocr_base64() {
         if (!fs.existsSync("./out")) fs.mkdirSync("./out");
         fs.writeFileSync("./out/out.json", JSON.stringify(res.data));
       }
-      else{
+      else {
         console.log('FAILED')
       }
     })
@@ -182,7 +183,7 @@ function run_ocr_url() {
 
   const obj = {
     img_url,
-    img_ext: 'png',
+    img_ext: img_url.split('.').pop().toLocaleLowerCase().trim(),
     lang: "eng",
     token: token_obj.token
   };

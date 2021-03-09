@@ -1,0 +1,26 @@
+const ERROR_CODE = {
+    GENERAL: -1,
+    OCR: {
+        FAILED: -102,
+        RESOURCE_NOT_FOUND: -103,
+        FAILED_GETTING_FILE_SIZE: -104,
+        FAILED_SAVING_IMAGE_DATA: -105,
+        IMAGE_NOT_PROVIDED: -106,
+        LANG_MUST_BE_3: -107,
+        IMG_EXT_NOT_SUPPORTED: -108,
+        IMG_EXT_IS_NULL: -108,
+    },
+    USER: {
+        INVALID_NAME: -200,
+        INVALID_EMAIL: -201,
+        EMAIL_ALREADY_REGISTERED: -202,
+        DB_ERROR_USER_CREATE_FAILED: -203,
+        DB_ERROR_USER_NOT_FOUND: -204,
+        DB_ERROR_EXCEPTION: -205,
+
+
+    }
+
+}
+
+module.exports = ERROR_CODE;
