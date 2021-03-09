@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authorizedOnly = require('../../security/authorizedOnly')
+const authorizedOnly = require('../../security/authorizedUserOnly')
 
 
 const ERROR_CODE = require('../../error_code')

@@ -4,9 +4,7 @@ const path = require('path');
 const secret = fs.readFileSync(path.join(__dirname, 'jwt.key'));
 const User = require('../models/user.js');
 
-//const secret = 'shhh'
-
-const authorizedOnly = function (req, res, next) {
+const authorizedUserOnly = function (req, res, next) {
   //const token = req.cookies.token;
 
   //   console.log('authorizedOnly: req.cookies', req.cookies);
@@ -37,8 +35,9 @@ const authorizedOnly = function (req, res, next) {
       }
       else { // valid token
 
-        const email = decoded; // email from token
-
+        // if the token is app token decoded ==> {email, app_name}
+        const email = decoded;
+        
         // get the user from db 
         User.findOne({ email: email })
           .then(user => {
@@ -48,10 +47,11 @@ const authorizedOnly = function (req, res, next) {
 
               if (!user.active) { // user not active
                 console.log('authorizedOnly - user is not active')
-                res.status(401).send('Unauthorized: User deactived');
+                res.status(401).send('Unauthorized: User not actived');
               }
               else {
-                req.user = user; // save the user to req
+                //  user and app_name to 
+                req.user = user; // set user
                 next()
               }
             }
@@ -64,11 +64,9 @@ const authorizedOnly = function (req, res, next) {
           .catch(err => {
             console.err(err)
           })
-
-
       }
     }); // jwt.verify
   }
 }
 
-module.exports = authorizedOnly;
+module.exports = authorizedUserOnly;

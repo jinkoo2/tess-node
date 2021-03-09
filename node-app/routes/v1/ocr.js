@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const { base64_decode } = require("../..//utils/base64coder");
 const User = require('../../models/user.js');
-const authorizedOnly = require('../../security/authorizedOnly')
+const authorizedAppOnly = require('../../security/authorizedAppOnly')
 const logger = require('../../providers/logger')
 const tess = require('../../providers/tess')
 const image_downloader = require('../../providers/image_downloader')
@@ -83,7 +83,7 @@ var multer = require('multer')
 var upload = multer({ dest: 'data/' })
 
 // run ocr
-router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => {
+router.post("/", upload.single('img_data'), authorizedAppOnly, (req, res, next) => {
 
   // inputs
   const user = req.user;
@@ -177,7 +177,7 @@ router.post("/", upload.single('img_data'), authorizedOnly, (req, res, next) => 
           ocr.file_size_mbyte = session.file_size_mbyte;
 
           // success
-          scc("OCR finished", session, res, req, ocr, {exec_ms: ocr.exec_ms})
+          scc("OCR finished", session, res, req, ocr, { exec_ms: ocr.exec_ms })
 
           // update user stats
           user.num_reqs += 1;
