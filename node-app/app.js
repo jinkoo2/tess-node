@@ -30,6 +30,10 @@ logger.info('MONGODB_USERS_URL=' + MONGODB_USERS_URL.replace(DB_USER_PW, 'xxx'))
 // App
 const app = express();
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+
 app.use((req, res, next) => {
   //
   // Dynamically setting Access-Control-Allow-Origin. This is basically allowing all incoming request
@@ -68,6 +72,7 @@ mongoose
 
 app.use('/api/v1/ocr', require('./routes/v1/ocr'))
 app.use('/api/v1/users', require('./routes/v1/user'))
+app.use('/api/v1/apps', require('./routes/v1/app'))
 
 // // setup morgan logger
 // app.use(morgan('combined', { stream: accessLogStream }))

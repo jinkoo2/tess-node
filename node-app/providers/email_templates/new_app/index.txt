@@ -1,0 +1,8 @@
+Congrats {{user_name}}!
+
+Your app {{app_name}} has been successfully registered. Here is you app token:
+
+App Token: {{app_token}}
+
+Best regards,
+MyOCR Team

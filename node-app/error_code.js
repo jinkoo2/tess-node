@@ -13,14 +13,19 @@ const ERROR_CODE = {
     USER: {
         INVALID_NAME: -200,
         INVALID_EMAIL: -201,
-        EMAIL_ALREADY_REGISTERED: -202,
-        DB_ERROR_USER_CREATE_FAILED: -203,
-        DB_ERROR_USER_NOT_FOUND: -204,
-        DB_ERROR_EXCEPTION: -205,
+        INVALID_TOKEN: -202,
+        EMAIL_ALREADY_REGISTERED: -203,
+        DB_ERROR_USER_CREATE_FAILED: -204,
+        DB_ERROR_USER_NOT_FOUND: -205,
+        DB_ERROR_EXCEPTION: -206,
+    },
 
-
+    APP: {
+        INVALID_TOKEN: -300,
+        INVALID_NAME: -301,
+        ALREADY_EXISTS: -302,
+        DB_ERROR_USER_SAVE_FAILED: -303,
     }
-
 }
 
 module.exports = ERROR_CODE;
