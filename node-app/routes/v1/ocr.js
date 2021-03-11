@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require("path");
 const fs = require("fs");
 const { base64_decode } = require("../..//utils/base64coder");
-const User = require('../../models/user.js');
+const OCR = require('../../models/ocr');
 const authorizedAppOnly = require('../../security/authorizedAppOnly')
 const logger = require('../../providers/logger')
 const tess = require('../../providers/tess')
@@ -30,7 +30,7 @@ router.get("/", (req, res, next) => {
 });
 
 // GET lang list
-router.get("/lang_list", authorizedOnly, (req, res, next) => {
+router.get("/lang_list", (req, res, next) => {
 
   //////////
   // inputs
@@ -79,26 +79,36 @@ function save_to_file({ img_url, img_base64, img_form_data_path, img_file_path }
     return fs_rename(img_form_data_path, img_file_path)
 }
 
-var multer = require('multer')
+var multer = require('multer');
+const { Exception } = require("handlebars");
 var upload = multer({ dest: 'data/' })
 
 // run ocr
-router.post("/", upload.single('img_data'), authorizedAppOnly, (req, res, next) => {
+router.post("/", authorizedAppOnly, upload.single('img_data'), (req, res, next) => {
 
+  ////////////////////////////////////
+  // app & user from authorizedAppOnly
+  const app = req.app;
+  const user = app.user;
+
+  console.log('==================')
+  console.log('app.name=', app.name)
+  console.log('user.email=', user.email)
+  console.log('==================')
+
+  ///////////
   // inputs
-  const user = req.user;
-  const session_id = req.uuid;
-
   const inputs = req.body;
   const { img_base64, img_url, img_ext, lang, output_json, output_pdf } = inputs
+  const req_mode = (img_base64) ? "img_base64" : (img_url) ? "img_url" : "img_data";
 
   // default oem & psm values
   const oem = inputs.oem || 3;
   const psm = inputs.psm || 1;
 
-  // this will be recorded on most logging.
-  const req_method = (img_base64) ? "img_base64" : (img_url) ? "img_url" : "img_data";
-  const session = { session_id, user_ip: req.userIp, email: user.email, oem, psm, lang, img_ext, req_method, date: new Date() }
+  // session
+  const session_id = req.uuid;
+  const session = { session_id, user_ip: req.userIp, email: user.email, app_name: app.name, oem, psm, lang, img_ext, req_method: req_mode, date: new Date() }
 
   logger.info("/ocr", { metadata: { session } })
 
@@ -148,6 +158,7 @@ router.post("/", upload.single('img_data'), authorizedAppOnly, (req, res, next) 
   save_to_file({ ...inputs, img_file_path })
     .then(() => {
 
+      console.log("================ save file succeeded ===================")
       ///////////////
       // file saved?
       if (!fs.existsSync(img_file_path)) {
@@ -168,32 +179,75 @@ router.post("/", upload.single('img_data'), authorizedAppOnly, (req, res, next) 
 
       /////////////
       // run ocr
-      tess.run_ocr({ img_file_path, lang, oem, psm, output_json, output_pdf })
-        .then(ocr => {
+      return tess.run_ocr({ img_file_path, lang, oem, psm, output_json, output_pdf })
+    })
+    .then(ocr_result => {
+      if (!ocr_result) {
+        throw new Exception("OCR failed - run_ocr() returned a null object")
+      }
 
-          // add session info
-          ocr.session_id = session_id;
-          ocr.success = true;
-          ocr.file_size_mbyte = session.file_size_mbyte;
+      console.log("================ run_ocr succeeded ===================")
 
-          // success
-          scc("OCR finished", session, res, req, ocr, { exec_ms: ocr.exec_ms })
+      // add session info
+      ocr_result.session_id = session_id;
+      ocr_result.success = true;
+      ocr_result.file_size_mbyte = session.file_size_mbyte;
 
-          // update user stats
-          user.num_reqs += 1;
+      // save & return response to the user
+      try {
+        scc("OCR finished", session, res, req, ocr_result, { exec_ms: ocr_result.exec_ms })
+      }
+      catch (error) {
+        throw new Exception('OCR failed - something went wrong')
+      }
 
-          if (output_json) user.num_pages += ocr.json.pages.length;
-          user.num_words += ocr.text.split(' ').length;
-          user.total_sec += ocr.exec_ms / 1000;
-          user.total_mbyte += ocr.file_size_mbyte;
-          user.save();
-        })
-        .catch(error => {
-          err(ERROR_CODE.OCR.FAILED, "OCR failed", session, res, req, true, error)
-          return;
-        })
-    }).
-    catch(error => {
+      // save the ocr
+      const ocr = new OCR({
+        app: app._id,
+        user: user._id,
+        success: true,
+        session_id,
+        img_ext,
+        req_mode,
+        req_ip: req.userIp,
+        num_pages: (ocr_result.json) ? ocr_result.json.pages.length : 1,
+        num_words: ocr_result.text.split(' ').length,
+        exec_ms: ocr_result.exec_ms,
+        file_size_mbyte: ocr_result.file_size_mbyte,
+      })
+      return ocr.save()
+    })
+    .then((ocr_ret) => {
+      if (!ocr_ret) {
+        throw new Exception("OCR failed - OCR.save() returned a null object")
+      }
+
+      console.log("================ ocr.save() succeeded ===================")
+
+      console.log('app.user.num_reqs=', app.user.num_reqs)
+      // update user stats
+      app.num_reqs += 1;
+      app.num_pages += ocr_ret.num_pages
+      app.num_words += ocr_ret.num_words;
+      app.total_sec += ocr_ret.exec_ms / 1000;
+      app.total_mbyte += ocr_ret.file_size_mbyte;
+      return app.save();
+    })
+    .then((app_ret) => {
+      if (!app_ret) {
+        throw new Exception("OCR failed - App.save() returned a null object")
+      }
+
+      console.log("================ app.user.save() succeeded ===================")
+
+      console.log('app_ret.user.num_reqs=', app_ret.user.num_reqs)
+    })
+    .catch(error => {
+
+      console.log("================ error ===================")
+      console.error(error)
+      console.log("================ error ===================")
+
       if (error && error.response && error.response.status == 404) {
         err(ERROR_CODE.OCR.RESOURCE_NOT_FOUND, `OCR failed - The resource not found (404). If img_url was provided, make sure the resource exists.`,
           session, res, req, true, error)

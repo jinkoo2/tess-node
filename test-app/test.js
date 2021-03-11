@@ -29,8 +29,10 @@ function base64_encode(file) {
   return new Buffer(bitmap).toString("base64");
 }
 
-if (args[0] == 'register')
-  register()
+if (args[0] == 'register-user')
+  register_user()
+else if (args[0] == 'register-app')
+  register_app()
 else if (args[0] == 'recover-token')
   recover_token()
 else if (args[0] == 'ocr-file')
@@ -49,7 +51,7 @@ else {
 /////////////////////
 // register
 
-function register() {
+function register_user() {
 
   const user = {
     name: 'Jinkoo Gmail',
@@ -61,6 +63,28 @@ function register() {
 
   axios
     .post(`${api_url}/users/register`, user)
+    .then(function (response) {
+
+      const obj = response.data;
+      console.log(obj)
+    })
+    .catch(function (error) {
+      console.log(error.message);
+    });
+}
+
+function register_app() {
+
+  const params = {
+    app_name: 'My Test App',
+    user_token: 'eyJhbGciOiJIUzI1NiJ9.amlua29vMkBnbWFpbC5jb20.qtAwDYl4NYNVuxAjYpzqGNfzCRfdq6VvUEdQ2s7kaXM',
+  };
+
+  console.log('register_app request')
+  console.log(params)
+
+  axios
+    .post(`${api_url}/apps/register`, params)
     .then(function (response) {
 
       const obj = response.data;
@@ -143,8 +167,6 @@ function run_ocr_file() {
 function run_ocr_base64() {
 
   const img_file = path.join(__dirname, "./phototest.tif");
-  const token_file = path.join(__dirname, "./token.json");
-  const token_obj = require(token_file)
 
   const obj = {
     img_base64: base64_encode(img_file),
@@ -152,7 +174,7 @@ function run_ocr_base64() {
     lang: "eng",
     output_json: true,
     output_pdf: true,
-    token: token_obj.token
+    app_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbmtvbzJAZ21haWwuY29tIiwiYXBwX25hbWUiOiJNeSBUZXN0IEFwcCIsImlhdCI6MTYxNTQ3OTc4OH0.gkt21VOnEsDiCLJleV6x9Noedl97OQSsQuK5hv2nuyM'
   };
 
   console.log('OCR request base64:')
@@ -168,10 +190,12 @@ function run_ocr_base64() {
       }
       else {
         console.log('FAILED')
+        console.log(res.data)
       }
     })
     .catch(function (error) {
-      console.log(error);
+      //console.log(error);
+      console.log('ERROR')
     });
 }
 

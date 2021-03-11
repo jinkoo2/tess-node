@@ -1,5 +1,4 @@
 const emailer = require('../providers/emailer');
-const { data } = require('../providers/logger');
 const logger = require('../providers/logger')
 
 function err(error_code, error_msg, session, res, req, notify_admin = false, error = null) {

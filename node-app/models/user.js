@@ -20,14 +20,6 @@ const UserSchema = mongoose.Schema(
       maxlength: 500
     },
 
-    // userid: { 
-    //   type: String, 
-    //   unique: true, 
-    //   required: true,
-    //   minlength:3,
-    //   maxlength:100
-    // },
-
     // not used for now
     password: {
       type: String,
@@ -42,7 +34,10 @@ const UserSchema = mongoose.Schema(
     },
 
     // user applications
-    apps: [],
+    apps: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'App'
+    }],
 
     settings: {
       type: Object
@@ -103,7 +98,8 @@ const UserSchema = mongoose.Schema(
     },
     token: {
       type: String,
-      default: ""
+      default: "",
+      unique: true,
     }
   },
   {
