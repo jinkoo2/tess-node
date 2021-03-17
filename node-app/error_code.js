@@ -18,13 +18,15 @@ const ERROR_CODE = {
         DB_ERROR_USER_CREATE_FAILED: -204,
         DB_ERROR_USER_NOT_FOUND: -205,
         DB_ERROR_EXCEPTION: -206,
+        UNAUTHORIZED: -207,
     },
     APP: {
         INVALID_TOKEN: -300,
         INVALID_NAME: -301,
         ALREADY_EXISTS: -302,
-        DB_ERROR_USER_SAVE_FAILED: -303,
+        DB_ERROR_APP_NOT_FOUND: -303,
         REGISTER_FAILED: -304,
+        ERROR: -305,
     },
     APP_AUTH: {
         NO_TOKEN: -400,
@@ -40,6 +42,15 @@ const ERROR_CODE = {
         USER_NOT_FOUND: -503,
         DB_ERROR: -504,
     },
+    ADMIN: {
+        INVALID_TOKEN: -600,
+        INVALID_EMAIL: -601,
+        DB_ERROR_USER_NOT_FOUND: -602,
+        ERROR_TOGGLE_USER_STATUS: -603,
+    },
+    LOG: {
+        INVALID_TOKEN: -700,
+    }
 }
 
 module.exports = ERROR_CODE;

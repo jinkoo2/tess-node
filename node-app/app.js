@@ -30,6 +30,24 @@ logger.info('MONGODB_USERS_URL=' + MONGODB_USERS_URL.replace(DB_USER_PW, 'xxx'))
 // App
 const app = express();
 
+
+app.use((req, res, next) => {
+  //
+  // Dynamically setting Access-Control-Allow-Origin. This is basically allowing all incoming request
+  // this can be used to limit the access.
+  // By not setting * always is to allow the requesters to have the cridential in the request
+  //
+  if (req.headers.origin) {
+    //console.log("setting req.headers.origin for cors");
+    res.append("Access-Control-Allow-Origin", req.headers.origin);
+  }
+
+  res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH");
+  res.append("Access-Control-Allow-Credentials", "true");
+  res.append("Access-Control-Allow-Headers", "Content-Type,*");
+  next();
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -41,7 +59,7 @@ app.use((req, res, next) => {
   // By not setting * always is to allow the requesters to have the cridential in the request
   //
   if (req.headers.origin) {
-    console.log("setting req.headers.origin for cors");
+    //console.log("setting req.headers.origin for cors - " + req.headers.origin);
     res.append("Access-Control-Allow-Origin", req.headers.origin);
   }
 
@@ -50,6 +68,8 @@ app.use((req, res, next) => {
   res.append("Access-Control-Allow-Headers", "Content-Type,*");
   next();
 });
+
+
 app.use(preProcessReq)
 
 // for parsing application/json
@@ -73,6 +93,8 @@ mongoose
 app.use('/api/v1/ocr', require('./routes/v1/ocr'))
 app.use('/api/v1/users', require('./routes/v1/user'))
 app.use('/api/v1/apps', require('./routes/v1/app'))
+app.use('/api/v1/admin', require('./routes/v1/admin'))
+app.use('/api/v1/logs', require('./routes/v1/log'))
 
 // // setup morgan logger
 // app.use(morgan('combined', { stream: accessLogStream }))
@@ -89,7 +111,7 @@ function getReqIp(req) {
     ip = req.connection.remoteAddress;
   } else {
     ip = req.ip;
-  } console.log("client IP is *********************" + ip);
+  } //console.log("client IP is *********************" + ip);
   return ip;
 }
 

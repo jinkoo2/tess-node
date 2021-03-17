@@ -24,7 +24,7 @@ function onSubmit(ev) {
     const inputs =
     {
         app_name: _("app-name").value,
-        token: user_token
+        user_token
     }
 
     var xhr = new XMLHttpRequest();

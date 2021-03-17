@@ -16,7 +16,11 @@ const secret = fs.readFileSync(path.join(__dirname, '../../security/jwt.key'));
 const emailer = require('../../providers/emailer')
 const logger = require('../../providers/logger')
 
-const { err, scc, is_validate_email } = require('../../utils/helper')
+const { err, scc, is_validate_email } = require('../../utils/helper');
+const config = require('../../config');
+const authorizedUserOnly = require("../../security/authorizedUserOnly");
+const authorizedAdminOnly = require("../../security/authorizedAdminOnly");
+
 
 router.post("/register", (req, res, next) => {
 
@@ -65,7 +69,7 @@ router.post("/register", (req, res, next) => {
           token: token,
         })
 
-        logger.info("Saving a new user", { metadata: { user, session } })
+        logger.info("Saving a new user", { metadata: { name, email, session } })
 
         user.save()
           .then(user => {
@@ -73,7 +77,9 @@ router.post("/register", (req, res, next) => {
             // send the token via email
             //emailer.send(email, "Your access token included", token)
             emailer.send_template(email, new_user_template_loader, {
-              name, user_token: token
+              name,
+              user_token: token,
+              home_url: `${config.server}/my_home`
             })
 
             // send the token to the user via email.
@@ -162,5 +168,41 @@ router.post("/send_me_my_token", (req, res, next) => {
       return;
     });
 })
+
+// my info
+router.post("/my_info", authorizedUserOnly, (req, res, next) => {
+
+  const { name, email, apps } = req.user;
+
+  const session = { session_id: req.uuid, user_ip: req.userIp, email: email }
+
+  res.send({ name, email, apps })
+
+  logger.info('/my_info success', { metadata: { session } })
+})
+
+// user list
+router.post("/list",
+  authorizedUserOnly,
+  authorizedAdminOnly,
+  (req, res, next) => {
+
+    const session_id = req.uuid;
+    const session = { session_id, user_ip: req.userIp }
+
+    const { name, email, apps, type } = req.user;
+
+    //////////////////////
+    // validate inputs
+    User.find()
+      .populate('apps')
+      .then(users => {
+        console.log('users', users)
+      })
+      .catch(error => {
+        console.log('error', error)
+      })
+  })
+
 
 module.exports = router;

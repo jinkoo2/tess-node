@@ -2,7 +2,7 @@ Welcome {{name}}!
 
 Please visit the following web page to get the access code for your application.
 
-http://localhost:3333/register_app?user_token={{user_token}}
+{{home_url}}?user_token={{user_token}}
 
 Best regards,
 MyOCR Team

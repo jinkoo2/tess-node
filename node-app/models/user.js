@@ -96,11 +96,6 @@ const UserSchema = mongoose.Schema(
       type: Number,
       default: 0
     },
-    token: {
-      type: String,
-      default: "",
-      unique: true,
-    }
   },
   {
     timestamps: true

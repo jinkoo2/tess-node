@@ -2,9 +2,11 @@ const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
 
+const app_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbmtvbzJAZ21haWwuY29tIiwiYXBwX25hbWUiOiJNeSBBcHAgMSIsImlhdCI6MTYxNjAwNjI4OH0.a1k1U3Aw4-H0xiG0FzqXB0BGcMOx4suL4Ao5UmByvYo';
 function print_usage() {
   console.log('usage:')
-  console.log('  test register - to register an account')
+  console.log('  test register-user - to register an account')
+  console.log('  test register-app - to register an app')
   console.log('  test recover-token - to recover my token')
   console.log('  test ocr-file - to run a test ocr with an input file')
   console.log('  test ocr-url - to run a test oc with an input urlr')
@@ -174,7 +176,7 @@ function run_ocr_base64() {
     lang: "eng",
     output_json: true,
     output_pdf: true,
-    app_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbmtvbzJAZ21haWwuY29tIiwiYXBwX25hbWUiOiJNeSBUZXN0IEFwcCIsImlhdCI6MTYxNTQ3OTc4OH0.gkt21VOnEsDiCLJleV6x9Noedl97OQSsQuK5hv2nuyM'
+    app_token
   };
 
   console.log('OCR request base64:')
@@ -229,8 +231,6 @@ function run_ocr_url() {
       console.log('ERROR')
       console.log(error);
     });
-
-
 }
 
 

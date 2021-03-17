@@ -35,7 +35,7 @@ router.post("/register", authorizedUserOnly, (req, res, next) => {
 
     // session object
     const session_id = req.uuid;
-    const session = { session_id, user_ip: req.userIp, user }
+    const session = { session_id, user_ip: req.userIp, email: user.email }
 
     // console.log('========= req.body ========')
     // console.log(req.body)
@@ -112,7 +112,7 @@ router.post("/register", authorizedUserOnly, (req, res, next) => {
 
             // log & response back to the user
             const data_to_user = { app_token }
-            const data_to_logger = { app_name, user }
+            const data_to_logger = { app_name, email: user.email }
             scc("app registered successfully", session, res, req, data_to_user, data_to_logger, true)
         })
         .catch(error => {
@@ -139,6 +139,66 @@ router.post("/register", authorizedUserOnly, (req, res, next) => {
     //     .catch(error => {
     //     });
 
+})
+
+router.post("/toggle_status", authorizedUserOnly, (req, res, next) => {
+
+    //////////////////////////////
+    // input parameters
+    // app_name
+    // user_token --> authorizedUserOnly converts user_token to req.user object 
+
+
+    // app_name
+    const { app_name, active } = req.body;
+
+    const user = req.user; // from user_token 
+
+    // session object
+    const session_id = req.uuid;
+    const session = { session_id, user_ip: req.userIp, user, app_name, active }
+
+    // console.log('========= req.body ========')
+    // console.log(req.body)
+
+    // console.log('========= req.user ========')
+    // console.log(req.user)
+
+    //////////////////////////////////////////////////////
+    // the user object should be valid (just double check)
+    if (!user) {
+        err(ERROR_CODE.APP.INVALID_TOKEN, "Invalid user token", session, res, req)
+        return;
+    }
+
+    //////////////
+    // app name
+    if (!app_name || app_name.length < 5 || app_name.length > 50) {
+        err(ERROR_CODE.APP.INVALID_NAME, "Invalid app name - the length should be between 5 and 50", session, res, req)
+        return;
+    }
+
+    ////////////////
+    // find the app
+    App.findOne({ name: app_name })
+        .then(app => {
+            if (app) {
+                app.active = !app.active;
+                return app.save();
+            }
+            else {
+                // app not found
+                err(ERROR_CODE.APP.DB_ERROR_APP_NOT_FOUND, "App not found in DB", session, res, req)
+                return;
+            }
+        })
+        .then(app_ret => {
+            scc("app status changed successfully", session, res, req, {}, {}, false)
+        })
+        .catch(error => {
+            err(ERROR_CODE.APP.ERROR, "Error - " + error.message, session, res, req)
+            return;
+        })
 })
 
 module.exports = router;

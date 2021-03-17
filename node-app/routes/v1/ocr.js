@@ -80,7 +80,6 @@ function save_to_file({ img_url, img_base64, img_form_data_path, img_file_path }
 }
 
 var multer = require('multer');
-const { Exception } = require("handlebars");
 var upload = multer({ dest: 'data/' })
 
 // run ocr

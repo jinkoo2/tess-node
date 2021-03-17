@@ -1,4 +1,4 @@
-var api_url = "http://localhost:3333/api/v1/users/register";
+var api_url = `http://${window.location.host}/api/v1/users/register`;
 
 function _(id) {
     return document.getElementById(id)
