@@ -21,7 +21,7 @@ function fetch_myinfo() {
 
     if (!user_token) {
         // user token is not given. So, take the user to the registration page.
-        alert('No token provide. Please register!')
+        show_error('No Token Yet? Please register!')
         return;
     }
 
@@ -40,9 +40,11 @@ function fetch_myinfo() {
             console.log('status', xhr.status);
             console.log('statusText', xhr.statusText);
 
-            var user = JSON.parse(xhr.response);
+            var data = JSON.parse(xhr.response);
 
-            console.log('data', user)
+            console.log('data', data)
+
+            const user = data.data;
 
             // user 
             _("user_name").innerHTML = user.name;
@@ -87,11 +89,14 @@ function fetch_users() {
     const urlParams = new URLSearchParams(queryString);
     const user_token = urlParams.get("user_token");
 
+
     if (!user_token) {
         // user token is not given. So, take the user to the registration page.
-        alert('No token provide. Please register!')
+        console.error('No user_token!')
+        show_error('Don\'t have a token yet? Please register!')
         return;
     }
+
 
     // fetch user data.
     const inputs =
@@ -184,7 +189,7 @@ function on_user_status_change_clicked(target) {
 
     if (!user_token) {
         // user token is not given. So, take the user to the registration page.
-        alert('No token provide!')
+        show_error('No Token Yet? Please register!')
         return;
     }
 

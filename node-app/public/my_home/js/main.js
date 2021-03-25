@@ -46,9 +46,11 @@ function fetch_user() {
             console.log('status', xhr.status);
             console.log('statusText', xhr.statusText);
 
-            var user = JSON.parse(xhr.response);
+            var data = JSON.parse(xhr.response);
 
-            console.log('data', user)
+            console.log('data', data)
+
+            const user = data.data;
 
             // user 
             _("user_name").innerHTML = user.name;

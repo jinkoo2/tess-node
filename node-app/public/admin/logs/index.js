@@ -1,6 +1,13 @@
 
 let api_url = `http://${window.location.host}/api/v1`;
 
+let filter = {
+    message: "",
+    level: "",
+    email: "",
+    user_ip: "",
+}
+
 class Pagenation {
     constructor() {
         this.page = 0;
@@ -94,11 +101,38 @@ class Pagenation {
 let pagenation = new Pagenation()
 let logs = null;
 
+
+
 function _(id) {
     return document.getElementById(id)
 }
 
 window.onload = () => {
+
+    _("date-range-checkbox").onchange = (e) => {
+
+        if (e.target.checked) {
+            _("date-from-input").disabled = false;
+            _("date-to-input").disabled = false;
+
+            _("date-from-input").value = "";
+            _("date-to-input").value = "";
+        }
+        else {
+            _("date-from-input").disabled = true;
+            _("date-to-input").disabled = true;
+        }
+
+        fetch_logs()
+    }
+
+    _("date-from-input").onchange = (e) => {
+        fetch_logs()
+    }
+
+    _("date-to-input").onchange = (e) => {
+        fetch_logs()
+    }
 
     // on submit
     fetch_myinfo()
@@ -142,6 +176,13 @@ function on_next_clicked() {
     fetch_logs();
 }
 
+function toDate(date_input_value) {
+    const YYYY_MM_DD = date_input_value;
+    const yyyy = parseInt(YYYY_MM_DD.split('-')[0])
+    const mm = parseInt(YYYY_MM_DD.split('-')[1])
+    const dd = parseInt(YYYY_MM_DD.split('-')[2])
+    return new Date(yyyy, mm - 1, dd)
+}
 
 function fetch_myinfo() {
 
@@ -153,7 +194,7 @@ function fetch_myinfo() {
 
     if (!user_token) {
         // user token is not given. So, take the user to the registration page.
-        alert('No token provide. Please register!')
+        show_error('Don\'t have a token yet? Please register!')
         return;
     }
 
@@ -172,9 +213,11 @@ function fetch_myinfo() {
             console.log('status', xhr.status);
             console.log('statusText', xhr.statusText);
 
-            var user = JSON.parse(xhr.response);
+            var data = JSON.parse(xhr.response);
 
-            console.log('data', user)
+            console.log('data', data)
+
+            const user = data.data;
 
             // user 
             _("user_name").innerHTML = user.name;
@@ -203,13 +246,33 @@ function fetch_logs() {
         return;
     }
 
-    // fetch user data.
-    const inputs =
+    let inputs =
     {
         user_token,
         skip: pagenation.page * pagenation.items_per_page,
         limit: pagenation.items_per_page,
+        filter,
     }
+
+    // inject date range to inputs.filter
+    const checkbox = _("date-range-checkbox");
+    const from = _("date-from-input")
+    const to = _("date-to-input")
+    if (checkbox.checked && from.value && to.value) {
+
+        let t0 = toDate(from.value)
+        let t1 = toDate(to.value)
+
+        t1.setHours(23)
+        t1.setMinutes(59)
+        t1.setSeconds(59)
+
+        inputs.filter = { ...filter, date_start: t0, date_end: t1 }
+    }
+
+    console.log('=============================')
+    console.log('inputs.filter', inputs.filter)
+    console.log('=============================')
 
     var xhr = new XMLHttpRequest();
     xhr.open("POST", api_url + "/logs", true);
@@ -279,19 +342,69 @@ function set_active_log(log_id) {
 
 function add_log(parent, log) {
 
-    const email = (log.meta && log.meta.session && log.meta.session.email) ? log.meta.session.email : "";
-    const user_id = (log.meta && log.meta.session && log.meta.session.user_ip) ? log.meta.session.user_ip : "";
+    //const email = (log.meta && log.meta.session && log.meta.session.email) ? log.meta.session.email : "";
+    const user_ip = (log.user_ip) ? (log.user_ip) : "";
+    const email = (log.email) ? (log.email) : "";
+    const level = (log.level) ? (log.level) : "";
     const msg = (log.message.length > 20) ? log.message.substring(0, 20) + "..." : log.message;
     let item = `
     <tr>
         <td scope="row">${_dstr(log.timestamp)}</td>
-        <td>${log.level}</td>
+        <td>${level}</td>
         <td>${msg}</td>
         <td>${email}</td>
-        <td>${user_id}</td>
+        <td>${user_ip}</td>
         <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModalCenter" onmouseover="set_active_log('${log._id}')">Details...</button></td>
     </tr>
     `
 
     parent.innerHTML += item;
 }
+
+var timerForMessageInput;
+function on_change_message_filter(element) {
+
+    // if needed clear the time out
+    if (timerForMessageInput)
+        clearTimeout(timerForMessageInput)
+
+    // excute after 2 seconds
+    timerForMessageInput = setTimeout(() => {
+        filter.message = element.value;
+
+        fetch_logs()
+    }, 1000) // excute after two seconds
+}
+
+function on_change_level_filter(element) {
+    filter.level = element.value;
+    fetch_logs()
+}
+
+var timerForEmailInput;
+function on_change_email_filter(element) {
+    // if needed clear the time out
+    if (timerForEmailInput)
+        clearTimeout(timerForEmailInput)
+
+    // excute after 2 seconds
+    timerForEmailInput = setTimeout(() => {
+        filter.email = element.value;
+
+        fetch_logs()
+    }, 1000) // excute after two seconds
+}
+
+function on_change_ip_filter(element) {
+    filter.user_ip = element.value;
+    fetch_logs()
+}
+
+function on_change_data_start_filter(element) {
+    console.log('on_change_data_start_filter', element.value)
+}
+
+function on_change_data_end_filter(element) {
+    console.log('on_change_data_end_filter', element.value)
+}
+

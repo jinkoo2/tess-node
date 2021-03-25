@@ -50,6 +50,9 @@ const ERROR_CODE = {
     },
     LOG: {
         INVALID_TOKEN: -700,
+    },
+    LANGLIST:{
+        ERROR: -800,
     }
 }
 

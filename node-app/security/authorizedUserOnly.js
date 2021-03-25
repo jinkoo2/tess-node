@@ -13,38 +13,35 @@ const authorizedUserOnly = function (req, res, next) {
   //   console.log('authorizedOnly: req.cookies', req.cookies);
   //   console.log('authorizedOnly: req.body.token', req.body.token);
   //   console.log('req.headers.orgin', req.headers.orgin)
-  //console.log('req.body=>', req.body)
+  //   console.log('req.body=>', req.body)
   //   console.log('req.query=>', req.query)
 
   // if service user type='service'
 
   const token =
     req.body.user_token ||
-    req.query.user_token ||
-    //req.headers['x-access-token'] ||
-    req.cookies.user_token;
-
-  const session_id = req.uuid;
-  const session = {
-    session_id,
-    token,
-  }
+    req.query.user_token;// ||
+  //req.headers['x-access-token'] ||
+  //req.cookies.user_token;
 
   if (!token) {
     //console.log('no token!')
     //res.status(401).send('Unauthorized: No token provided');
-    err(ERROR_CODE.USER_AUTH.NO_TOKEN, "missing user_token parameter", session, res, req)
+    err(ERROR_CODE.USER_AUTH.NO_TOKEN, "missing user_token parameter", res, req)
+    return;
   }
   else {
     jwt.verify(token, secret, function (error, decoded) {
       if (error) {
         //res.status(401).send('Unauthorized: Invalid token');
-        err(ERROR_CODE.USER_AUTH.UNAUTHORIZED_TOKEN, "the user of the given app_token is not authorized", session, res, req, false, error)
+        err(ERROR_CODE.USER_AUTH.UNAUTHORIZED_TOKEN, "the user of the given app_token is not authorized", res, req, false, error)
       }
       else { // valid token
 
         // if the token is app token decoded ==> {email, app_name}
         const email = decoded;
+
+        req.session.email = email;
 
         // get the user from db 
         User.findOne({ email: email })
@@ -57,7 +54,7 @@ const authorizedUserOnly = function (req, res, next) {
               if (!user.active) { // user not active
                 //console.log('authorizedOnly - user is not active')
                 //res.status(401).send('Unauthorized: User not actived');
-                err(ERROR_CODE.USER_AUTH.USER_DISABLED, "User disabled", session, res, req)
+                err(ERROR_CODE.USER_AUTH.USER_DISABLED, "User disabled", res, req)
               }
               else {
                 //  user and app_name to 
@@ -68,11 +65,11 @@ const authorizedUserOnly = function (req, res, next) {
             else {
               // user not found in DB
               //res.status(401).send('Unauthorized: User not found');
-              err(ERROR_CODE.USER_AUTH.USER_NOT_FOUND, "User not found. Please check if your user_token is correct", session, res, req)
+              err(ERROR_CODE.USER_AUTH.USER_NOT_FOUND, "User not found. Please check if your user_token is correct", req.session, res, req)
             }
           })
           .catch(error => {
-            err(ERROR_CODE.USER_AUTH.DB_ERROR, "User authentication failed", session, res, req, true, error)
+            err(ERROR_CODE.USER_AUTH.DB_ERROR, "User authentication failed", res, req, true, error)
           })
       }
     }); // jwt.verify

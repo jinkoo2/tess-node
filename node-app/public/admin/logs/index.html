@@ -26,6 +26,9 @@
                 <h2>Logs</h2>
             </div>
 
+            <!-- Filters -->
+
+
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
@@ -36,6 +39,44 @@
                         <th scope="col">Ip</th>
                         <th scope="col">Details</th>
                     </tr>
+                    <tr>
+                        <th scope="col">
+                            <div id="date_range_container">
+                                <div id='date-range-checkbox-div'>
+                                    <input type="checkbox" value="" id='date-range-checkbox'>
+                                </div>
+                                <div id='date-from-div'>
+                                    <input type="date" class="form-control form-control-sm" id='date-from-input'
+                                        disabled>
+                                </div>
+
+                                <div id='date-to-div'>
+                                    <input type="date" class="form-control form-control-sm" id='date-to-input' disabled>
+                                </div>
+                            </div>
+                        </th>
+                        <th scope="col"><select name="level" id="level" class="form-control form-control-sm"
+                                onchange="on_change_level_filter(this)">
+                                <option value=""></option>
+                                <option value="info">info</option>
+                                <option value="warning">warning</option>
+                                <option value="error">error</option>
+                            </select></th>
+                        <th scope="col">
+                            <input type='text' placeholder="message" class="form-control form-control-sm"
+                                oninput="on_change_message_filter(this)" />
+                        </th>
+                        <th scope="col">
+                            <input type='text' placeholder="email" class="form-control form-control-sm"
+                                oninput="on_change_email_filter(this)" />
+                        </th>
+                        <th scope="col">
+                            <input type='text' placeholder="ip" class="form-control form-control-sm"
+                                oninput="on_change_ip_filter(this)" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+
                 </thead>
                 <tbody id="log-list">
                     <tr>

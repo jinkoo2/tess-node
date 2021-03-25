@@ -3,8 +3,6 @@ $(document).ready(function () {
     var form = document.forms.namedItem("fileinfo");
     form.addEventListener('submit', function (ev) {
 
-        
-
         var divOutput = document.querySelector("div")
 
         var formData = new FormData(form);
