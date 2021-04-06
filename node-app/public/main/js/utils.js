@@ -7,6 +7,7 @@ function is_validate_email(email) {
     return re.test(email);
 }
 
+
 function error(msg) {
     //alert(msg)
 
