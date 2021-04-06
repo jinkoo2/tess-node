@@ -10132,3 +10132,18 @@ pre code {
   padding: 10px;
   border-radius: 5px;
 }
+
+#contact-us-msg{
+  width: 100%;
+  max-width: 800px;
+  height: 300px;
+}
+
+/* JQuery Form Validator Error  */
+form .error {
+  color: #ff0000;
+}
+
+#show-dlg-button {
+  display: none
+}

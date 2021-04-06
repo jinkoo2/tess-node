@@ -36,7 +36,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#getting-started">Getting Started</a>
                 </li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#examples">Examples</a></li>
-                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#demo">Live Demo</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#demo">Test OCR</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#contact-us">Contact Us</a></li>
             </ul>
         </div>
@@ -52,8 +52,9 @@
                 <div class="subheading mb-5">
                     Image-To-Text RESTFUL API
                 </div>
-                <p class="lead mb-5">MYOCR.NET is a restful api, using which developers can convert or extract words
-                    from images and pdf documents. Given an image, the API returns a structured JSON object with words and their sementic
+                <p class="lead mb-5">MYOCR.NET is a restful API. Developers can use the API to extract words
+                    from images and convert to searchable pdf documents. Given an image, the API returns a structured
+                    JSON object with words and their sementic
                     locations in the text. The API is free to use for any applications.</p>
                 <div class="social-icons">
                     <a class="social-icon" href="#"><i class="fab fa-linkedin-in"></i></a>
@@ -72,25 +73,29 @@
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Register</h3>
                         <!-- <div class="subheading mb-3">Intelitec Solutions</div> -->
-                        <p class="lead">Register here to get a user token. Once registered, you will receive an email
-                            with links and intructions to get your own app tokens.</p>
-                        <form method="post" name="myform" id="myform" action="/v1/users/register">
+                        <p class="lead">First, register here to get a user token. Once registered, you will receive an
+                            email
+                            with links and intructions to get your own app tokens. Then, download example codes and try.
+                        </p>
+                        <form method="post" name="register_user_form" id="register_user_form"
+                            action="/v1/users/register">
                             <!-- Name -->
                             <div>
                                 <label>Name:</label>
-                                <input type="text" name="name" id="name" required value="Jinkoo Kim" />
+                                <input type="text" name="register_user_name" id="register_user_name" required />
                             </div>
 
                             <!-- Email -->
                             <div>
                                 <label>Email:</label>
-                                <input type="email" name="email" id="email" required value="jinkoo2@gmail.com" />
+                                <input type="email" name="register_user_email" id="register_user_email" required />
                             </div>
                             <!-- SUBMIT -->
                             <div>
                                 <input type="submit" value="Register" />
                             </div>
                         </form>
+                        <div id="register_user_output_text"></div>
                     </div>
                     <!-- <div class="flex-shrink-0"><span class="text-primary">March 2013 - Present</span></div> -->
                 </div>
@@ -104,7 +109,9 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
                     <div class="flex-grow-1">
                         <p class="lead">
-                            Client application examples and their instructions are avilable <a href="https://github.com/jinkoo2/myocr-examples">HERE</a>. Simply download them, update the app token with your own in the source code, and excute to test. 
+                            Example applications and their instructions are avilable <a
+                                href="https://github.com/jinkoo2/myocr-examples">HERE</a>. Simply download them, update
+                            the code with your own app token, and excute to test.
                         </p>
                     </div>
                 </div>
@@ -114,41 +121,9 @@
         <!-- Live Demo-->
         <section class="resume-section" id="demo">
             <div class="resume-section-content">
-                <h2 class="mb-5">Live Demo</h2>
-                <div class="subheading mb-3">Programming Languages & Tools</div>
-                <ul class="list-inline dev-icons">
-                    <li class="list-inline-item"><i class="fab fa-html5"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-css3-alt"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-js-square"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-angular"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-react"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-node-js"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-sass"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-less"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-wordpress"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-gulp"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-grunt"></i></li>
-                    <li class="list-inline-item"><i class="fab fa-npm"></i></li>
-                </ul>
-                <div class="subheading mb-3">Workflow</div>
-                <ul class="fa-ul mb-0">
-                    <li>
-                        <span class="fa-li"><i class="fas fa-check"></i></span>
-                        Mobile-First, Responsive Design
-                    </li>
-                    <li>
-                        <span class="fa-li"><i class="fas fa-check"></i></span>
-                        Cross Browser Testing & Debugging
-                    </li>
-                    <li>
-                        <span class="fa-li"><i class="fas fa-check"></i></span>
-                        Cross Functional Teams
-                    </li>
-                    <li>
-                        <span class="fa-li"><i class="fas fa-check"></i></span>
-                        Agile Development & Scrum
-                    </li>
-                </ul>
+                <h2 class="mb-5">Test OCR</h2>
+                <!-- Live Demo -->
+                You can test OCR with your own image <a href="/test_ocr">HERE.</a>
             </div>
         </section>
         <hr class="m-0" />
@@ -156,17 +131,97 @@
         <section class="resume-section" id="contact-us">
             <div class="resume-section-content">
                 <h2 class="mb-5">Contact Us</h2>
-                <p>If you have any question, please send an email to support (myocr.net@gmail.com). Or, use our community forum.</p>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
+                    <div class="flex-grow-1">
+
+                        <!-- <div class="subheading mb-3">Intelitec Solutions</div> -->
+                        <p class="lead">If you have any question, please fill and submi this form. Or, use our community
+                            forum.</p>
+                        <form method="post" name="contact_us_form" id="contact_us_form" action="/v1/users/contact-us">
+                            <!-- Name -->
+                            <div>
+                                <label>Name:</label>
+                                <input type="text" name="contact_us_name" id="contact_us_name" required />
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label>Email:</label>
+                                <input type="email" name="contact_us_email" id="contact_us_email" required />
+                            </div>
+
+                            <!-- Subject -->
+                            <div>
+                                <label>Subject:</label>
+                                <input type="text" name="contact_us_subject" id="contact_us_subject" required />
+                            </div>
+
+                            <!-- Message -->
+                            <div>
+                                <textarea name="contact_us_msg" id="contact_us_msg" required></textarea>
+                            </div>
+
+                            <!-- SUBMIT -->
+                            <div>
+                                <input type="submit" value="Submit" />
+                            </div>
+                        </form>
+                        <div id="contact_us_output_text"></div>
+                    </div>
+                    <!-- <div class="flex-shrink-0"><span class="text-primary">March 2013 - Present</span></div> -->
+                </div>
+
+
             </div>
         </section>
         <hr class="m-0" />
+
+        <!-- Button trigger modal -->
+        <button type="button" id="show-dlg-button" class="btn btn-primary" data-toggle="modal"
+            data-target="#exampleModal">
+            Launch demo modal
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="dlgTitle"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dlgTitle">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="dlgBody">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+
+
     <!-- Bootstrap core JS-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Third party plugin JS-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+    <!-- Form Validator-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+
     <!-- Core theme JS-->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/register-user.js"></script>
+    <script src="js/contact-us.js"></script>
     <script src="js/scripts.js"></script>
 </body>
 

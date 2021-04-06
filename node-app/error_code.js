@@ -19,6 +19,7 @@ const ERROR_CODE = {
         DB_ERROR_USER_NOT_FOUND: -205,
         DB_ERROR_EXCEPTION: -206,
         UNAUTHORIZED: -207,
+        INVALID_CONTACTUS_MSG: -208,
     },
     APP: {
         INVALID_TOKEN: -300,
@@ -51,7 +52,7 @@ const ERROR_CODE = {
     LOG: {
         INVALID_TOKEN: -700,
     },
-    LANGLIST:{
+    LANGLIST: {
         ERROR: -800,
     }
 }

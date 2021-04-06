@@ -7,15 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Run OCR</title>
   <script src="index.js"></script>
+  <link href="index.css" rel="stylesheet" />
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
+  
+  <!-- Live Demo -->
+  <div>
   <form enctype="multipart/form-data" method="post" name="myform" id="myform">
     <!-- IMAGE -->
     <div>
       <label>File:</label>
-      <input type="file" name="img_data" id="img_data" required />
+      <input type="file" name="img_data" id="img_data" accept="image/*,.pdf" required />
     </div>
 
     <!-- LANGUAGE -->
@@ -30,10 +34,15 @@
     </div>
 
   </form>
+
+  <div id='preview'></div>
+
   <div>TEXT</div>
   <div id="output_text"></div>
   <div>JSON</div>
   <div id="output_json"></div>
+
+</div>
 
 </body>
 

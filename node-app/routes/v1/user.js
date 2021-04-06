@@ -3,6 +3,8 @@ const router = express.Router();
 const path = require("path");
 const fs = require("fs");
 
+const logger = require('../../providers/logger')
+
 const email_template_loader = require('../../providers/email_template_loader')
 const new_user_template_loader = email_template_loader.get_loader("new_user")
 
@@ -22,8 +24,6 @@ const authorizedUserOnly = require("../../security/authorizedUserOnly");
 router.post("/register", (req, res, next) => {
 
   const { name, email } = req.body;
-  const session_id = req.uuid;
-  const session = { session_id, user_ip: req.user_ip, url: req.url, email }
 
   //logger.info('/register', { metadata: { name, email, session } })
 
@@ -104,102 +104,50 @@ router.post("/register", (req, res, next) => {
 
 })
 
-// router.post("/send_me_my_token", (req, res, next) => {
-
-//   const { email } = req.body;
-//   const session_id = req.uuid;
-//   const session = { session_id, user_ip: req.userIp, email }
-
-//   //logger.info('/send_me_my_token', { metadata: { email, session_id } })
-
-//   //////////////////////
-//   // validate inputs
-//   // email
-//   if (!is_validate_email(email)) {
-//     logger.info("Invalid email", { metadata: { email, session } })
-//     res.send(`Invalid email! email=${email}, session_id=${session_id}`)
-//     return;
-//   }
-
-//   // check if the email has been registered already
-//   User.findOne({ email })
-//     .then(user => {
-//       if (user) { // a registered user found
-//         logger.info('A registered user found in DB', { metadata: { email, session } })
-
-//         // generate a token - this token should be the same as the one in DB
-//         const token = jwt.sign(email, secret);
-
-//         if (token !== user.token) {
-//           // this should not happen. this differemt, log and notify the admin via email
-//           logger.warn('User requested a token discovery, but the newly generate token is different from the one in DB. So, updating the DB with the new token.', { metadata: { session } });
-
-//           // update the token to DB
-//           user.token = token;
-//           user.save()
-//             .then(data => {
-//               logger.info('Success - updated the token in DB', { metadata: { email, token, data, session } });
-//             })
-//             .catch(error => {
-//               err(ERROR_CODE.USER.DB_ERROR_EXCEPTION,
-//                 "/send_me_my_token failed - Server error - DB exception - failed saving to DB",
-//                 session, res, req, true, error)
-//               return;
-//             });
-//         }
-
-//         // send the token via email
-//         logger.info('sending a recovered token', { metadata: { session } });
-//         emailer.send(email, "Your recovered access token included", token)
-//         res.send({ msg: 'Your token has been sent to to your email', success: true, session_id, email })
-//         emailer.notifyAdmins("A token recovery was successful", JSON.stringify({ email, session }))
-//       }
-//       else { // no user found of the email address
-//         res.send({ msg: 'Your account not found. Please register first.', success: false, session_id, email })
-//       }
-//     })
-//     .catch(error => {
-//       err(ERROR_CODE.USER.DB_ERROR_EXCEPTION,
-//         "/regiser failed - Server error - DB exception",
-//         session, res, req, true, error)
-//       return;
-//     });
-// })
-
 // my info
 router.post("/my_info", authorizedUserOnly, (req, res, next) => {
-
   const { name, email, apps } = req.user;
-  const session = { session_id: req.uuid, user_ip: req.userIp, email: email }
-
-
   const data_to_user = { name, email, apps };
   const data_to_logger = { name, email, apps };
   scc('/my_info success', res, req, data_to_user, data_to_logger, false)
-
 })
 
-// // user list
-// router.post("/list",
-//   authorizedUserOnly,
-//   authorizedAdminOnly,
-//   (req, res, next) => {
 
-//     const session_id = req.uuid;
-//     const session = { session_id, user_ip: req.userIp }
-//     const { name, email, apps, type } = req.user;
+router.post("/contact-us", (req, res, next) => {
 
-//     //////////////////////
-//     // validate inputs
-//     User.find()
-//       .populate('apps')
-//       .then(users => {
-//         console.log('users', users)
-//       })
-//       .catch(error => {
-//         console.log('error', error)
-//       })
-//   })
+  const { name, email, msg } = req.body;
 
+  logger.info('/contact-us', { metadata: { ...req.body, session: req.session } })
+
+  //////////////////////
+  // validate inputs
+  // name
+  if (!name || name.length < 2 || name.length > 100) {
+    err(ERROR_CODE.USER.INVALID_NAME,
+      "/contact-us failed - Invalid name (Name must have 2-100 characters!",
+      res, req)
+    return;
+  }
+
+  // email
+  if (!is_validate_email(email)) {
+    err(ERROR_CODE.USER.INVALID_EMAIL,
+      "/contact-us failed - Invalid email",
+      res, req)
+    return;
+  }
+
+  // msg
+  if (!msg || msg.length < 2) {
+    err(ERROR_CODE.USER.INVALID_CONTACTUS_MSG,
+      "/contact-us failed - Message is too short!",
+      res, req)
+    return;
+  }
+
+  emailer.notifyAdmins("Incoming Contact Us Form", JSON.stringify(req.body))
+
+  scc('/contact-us success', res, req, {}, {}, false)
+})
 
 module.exports = router;

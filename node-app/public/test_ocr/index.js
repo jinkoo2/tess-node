@@ -1,12 +1,17 @@
 var api_url = "http://localhost:3333/api/v1";
 const app_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbmtvbzJAZ21haWwuY29tIiwiYXBwX25hbWUiOiJNeSBBcHAgMiIsImlhdCI6MTYxNjE3NDE5N30.hrsu1QOLO5yLiYQ_F5LiLqvZVRKuR_y__S3AkGyos-I';
 
+function _(id) {
+    return document.getElementById(id)
+}
 window.onload = () => {
     // get supported language list
     get_lang_list();
 
     // on submit
-    document.getElementById('myform').addEventListener('submit', onSubmit, false);
+    _('myform').addEventListener('submit', onSubmitOCR, false);
+
+    _('img_data').addEventListener('change', onImageChange, false)
 }
 
 function get_lang_list() {
@@ -51,7 +56,36 @@ function _(id) {
     return document.getElementById(id)
 }
 
-function onSubmit(ev) {
+function onImageChange(e) {
+    console.log(e)
+
+
+
+    const file = _('img_data').files[0];
+
+    console.log(file)
+
+    if (file.type.startsWith('image/')) {
+        // the file is image
+        console.log('file is an image')
+
+        const img = document.createElement("img");
+        img.classList.add("preview_img");
+        img.file = file;
+        _('preview').appendChild(img);
+
+        const reader = new FileReader();
+        reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(img);
+        reader.readAsDataURL(file);
+
+    }
+    else if (file.type == 'application/pdf') {
+        console.log('file is a PDF')
+    }
+}
+
+
+function onSubmitOCR(ev) {
 
     ev.preventDefault();
     console.log('onSubmit()')

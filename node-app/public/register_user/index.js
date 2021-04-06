@@ -6,9 +6,9 @@ function _(id) {
 
 window.onload = () => {
     // on submit
-    _('myform').addEventListener('submit', onSubmit, false);
+    _('myform').addEventListener('submit', onSubmitOCR, false);
 }
-function onSubmit(ev) {
+function onSubmitOCR(ev) {
 
     ev.preventDefault();
 
@@ -44,8 +44,6 @@ function onSubmit(ev) {
 
     console.log('req sent!')
 }
-
-
 
 function ocr() {
 
