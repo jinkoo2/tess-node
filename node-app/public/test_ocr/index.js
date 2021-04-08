@@ -4,7 +4,7 @@ const app_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbmtvbzJA
 function _(id) {
     return document.getElementById(id)
 }
-window.onload = () => {
+window.addEventListener('load', () => {
     // get supported language list
     get_lang_list();
 
@@ -12,7 +12,7 @@ window.onload = () => {
     _('myform').addEventListener('submit', onSubmitOCR, false);
 
     _('img_data').addEventListener('change', onImageChange, false)
-}
+})
 
 function get_lang_list() {
     // get lang list & polulate the drop down
@@ -59,8 +59,6 @@ function _(id) {
 function onImageChange(e) {
     console.log(e)
 
-
-
     const file = _('img_data').files[0];
 
     console.log(file)
@@ -72,6 +70,8 @@ function onImageChange(e) {
         const img = document.createElement("img");
         img.classList.add("preview_img");
         img.file = file;
+
+        _('preview').innerHTML = "";
         _('preview').appendChild(img);
 
         const reader = new FileReader();
@@ -120,7 +120,13 @@ function onSubmitOCR(ev) {
 
             console.log('data', data)
             _("output_text").innerHTML = data.text;
-            _("output_json").innerHTML = JSON.stringify(data.json);
+            _("output_json").innerHTML = "";// JSON.stringify(data.json);
+
+            _("output_json").appendChild(renderjson
+                .set_icons('+', '-')
+                .set_max_string_length(30)
+                .set_show_to_level(7)
+                (data.json))
         }
     }
 

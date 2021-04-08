@@ -64,6 +64,8 @@ function log_info(msg, session = null) {
         ...session,
     });
 
+    console.log(log)
+
     return log.save();
 }
 
@@ -74,10 +76,15 @@ function log_error(msg, error, session = null) {
         error,
         ...session
     });
+
+    console.error(log)
     return log.save();
 }
 
 function log_obj(obj) {
+
+    console.log(obj)
+
     return new Log(obj).save();
 }
 

@@ -1,0 +1,16 @@
+/* .renderjson a              { text-decoration: none; }
+.renderjson .disclosure    { color: black;
+                             font-size: 150%; }
+.renderjson .syntax        { color: black; }
+.renderjson .string        { color: black; }
+.renderjson .number        { color: black; }
+.renderjson .boolean       { color: black; }
+.renderjson .key           { color: black }
+.renderjson .keyword       { color: black }
+.renderjson .object.syntax { color: black }
+.renderjson .array.syntax  { color:black } */
+
+.renderjson { color:black }
+.renderjson a { text-decoration: none; }
+.renderjson .disclosure    { color: black;
+    font-size: 150%; }

@@ -2,3 +2,22 @@
     width: 400px;
     border: solid 1px black;
 }
+
+#output_text, #output_json{
+    border: solid lightgray 1px;
+    margin: 5px 0px;
+    padding: 5px;
+    min-height: 100px;
+    max-width: 600px;
+    border-radius: 5px;
+    box-shadow: 3px 3px 3px #888888;
+}
+
+input {
+    margin: 5px 0px;
+}
+
+#output_json {
+    overflow: scroll;
+    max-height: 500px;
+}

@@ -2,16 +2,16 @@ const fs = require("fs");
 const { parse, valid } = require("node-html-parser");
 const { stringify } = require("uuid");
 
-function parse_bbox(str){
-    return str.trim().split(' ').slice(1).map(i => parseInt(i))
+function parse_bbox(str) {
+  return str.trim().split(' ').slice(1).map(i => parseInt(i))
 }
 
-function parse_page_no(str){
-    return parseInt(str.trim().split(' ')[1])
+function parse_page_no(str) {
+  return parseInt(str.trim().split(' ')[1])
 }
 
-function parse_x_wconf(str){
-    return parseInt(str.trim().split(' ')[1])
+function parse_x_wconf(str) {
+  return parseInt(str.trim().split(' ')[1])
 }
 
 function parse_pages(pageNodes, out_array) {
@@ -114,12 +114,15 @@ function parse_words(wordNodes, out_array) {
 
     const [bbox, x_wconf] = title.split(';')
 
+    const text = wordNode.innerHTML;
+
     // extract info
     const word = {
       id: wordNode.id,
       bbox: parse_bbox(bbox),
       conf: parse_x_wconf(x_wconf),
       info: title,
+      text,
     };
 
     // add to the output
@@ -142,7 +145,7 @@ function hocr2json(hocr_file) {
   // read hocr file
   const html = fs.readFileSync(hocr_file).toString();
 
-  if(!html || !valid(html)){
+  if (!html || !valid(html)) {
     console.error("Error: The content of hocr file is invalid: " + hocr_file);
     return;
   }

@@ -1,5 +1,3 @@
-const { __esModule } = require("uuid/dist/v1");
-
 const util = require('util')
 const fs = require('fs')
 const fs_writeFile = util.promisify(fs.writeFile)
@@ -21,5 +19,5 @@ function base64_decode(base64str, file) {
     return fs_writeFile(file, bitmap);
 }
 
-module.exports = {base64_encode, base64_decode}
+module.exports = { base64_encode, base64_decode }
 
